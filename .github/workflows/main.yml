@@ -5,7 +5,10 @@ name: autopush
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the master branch
 on:
-  push
+  schedule:
+    - cron: '0 0 * * *'
+  watch:
+    types: [started]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -24,10 +27,12 @@ jobs:
         run: |
           git config --global user.name 'bczhc'
           git config --global user.email 'bczhc0@126.com'
+          rm -rf single_include
           git clone https://github.com/nlohmann/json.git
           mv ./json/single_include/ ./
           rm -rf json
           git add single_include
-          git commit -m 'update'
-          git push -f
+          msg="update `date`"
+          if [[ `git commit -m "$msg" | grep "working tree clean"` != "" ]]; then exit; fi
+          git push
 
